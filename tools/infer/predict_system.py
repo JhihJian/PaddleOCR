@@ -134,6 +134,7 @@ def main(args):
     text_sys = TextSystem(args)
     is_visualize = True
     font_path = args.vis_font_path
+    result_dict={}
     for image_file in image_file_list:
         img, flag = check_and_read_gif(image_file)
         if not flag:
@@ -144,37 +145,41 @@ def main(args):
         starttime = time.time()
         dt_boxes, rec_res = text_sys(img)
         elapse = time.time() - starttime
-        print("Predict time of %s: %.3fs" % (image_file, elapse))
-
+        # print("Predict time of %s: %.3fs" % (image_file, elapse))
+        text_result=""
         drop_score = 0.5
         dt_num = len(dt_boxes)
         for dno in range(dt_num):
             text, score = rec_res[dno]
             if score >= drop_score:
+                text_result+=text+"\n";
                 text_str = "%s, %.3f" % (text, score)
-                print(text_str)
+                # print(text_str)
+        base_name=os.path.splitext(os.path.basename(image_file))[0]
+        result_dict[base_name]=text_result
+    return result_dict
 
-        if is_visualize:
-            image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
-            boxes = dt_boxes
-            txts = [rec_res[i][0] for i in range(len(rec_res))]
-            scores = [rec_res[i][1] for i in range(len(rec_res))]
-
-            draw_img = draw_ocr_box_txt(
-                image,
-                boxes,
-                txts,
-                scores,
-                drop_score=drop_score,
-                font_path=font_path)
-            draw_img_save = "./inference_results/"
-            if not os.path.exists(draw_img_save):
-                os.makedirs(draw_img_save)
-            cv2.imwrite(
-                os.path.join(draw_img_save, os.path.basename(image_file)),
-                draw_img[:, :, ::-1])
-            print("The visualized image saved in {}".format(
-                os.path.join(draw_img_save, os.path.basename(image_file))))
+        # if is_visualize:
+        #     image = Image.fromarray(cv2.cvtColor(img, cv2.COLOR_BGR2RGB))
+        #     boxes = dt_boxes
+        #     txts = [rec_res[i][0] for i in range(len(rec_res))]
+        #     scores = [rec_res[i][1] for i in range(len(rec_res))]
+        #
+        #     draw_img = draw_ocr_box_txt(
+        #         image,
+        #         boxes,
+        #         txts,
+        #         scores,
+        #         drop_score=drop_score,
+        #         font_path=font_path)
+        #     draw_img_save = "./inference_results/"
+        #     if not os.path.exists(draw_img_save):
+        #         os.makedirs(draw_img_save)
+        #     cv2.imwrite(
+        #         os.path.join(draw_img_save, os.path.basename(image_file)),
+        #         draw_img[:, :, ::-1])
+        #     print("The visualized image saved in {}".format(
+        #         os.path.join(draw_img_save, os.path.basename(image_file))))
 
 
 if __name__ == "__main__":

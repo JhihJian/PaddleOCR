@@ -152,7 +152,7 @@ def main(args):
         for dno in range(dt_num):
             text, score = rec_res[dno]
             if score >= drop_score:
-                text_result+=text+"\n";
+                text_result+=text+",";
                 text_str = "%s, %.3f" % (text, score)
                 # print(text_str)
         base_name=os.path.splitext(os.path.basename(image_file))[0]
